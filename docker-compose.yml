@@ -2,6 +2,7 @@ version: '3.1'
 services:
   stats-server:
     build: statsService
+    image: stats_image
     container_name: ewm-stats
     ports:
       - "9090:9090"
@@ -16,7 +17,7 @@ services:
     image: postgres:14-alpine
     container_name: stats-db
     ports:
-      - "6555:5432"
+      - "6540:5432"
     environment:
       - POSTGRES_DB=ewmstats
       - POSTGRES_USER=postgres
@@ -24,6 +25,7 @@ services:
 
   ewm-service:
     build: mainService
+    image: service_image
     container_name: ewm-service
     ports:
       - "8080:8080"
