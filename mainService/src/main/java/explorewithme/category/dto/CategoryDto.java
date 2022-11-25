@@ -9,6 +9,6 @@ import lombok.*;
 @ToString
 public class CategoryDto {
 
-    private Integer id;
+    private Long id;
     private String name;
 }

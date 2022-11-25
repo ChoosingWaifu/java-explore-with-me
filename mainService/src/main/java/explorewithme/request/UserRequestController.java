@@ -13,24 +13,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserRequestController {
 
+    private final RequestService service;
+
     @GetMapping
-    public List<ParticipationRequestDto> getRequests(@PathVariable Integer userId) {
+    public List<ParticipationRequestDto> getRequests(@PathVariable Long userId) {
         log.info("private, get requests, userId {}", userId);
-        return null;
+        return service.getRequests(userId);
     }
 
-    @PatchMapping
-    public ParticipationRequestDto addRequest(@RequestParam Integer requestId,
-                                              @PathVariable Integer userId) {
-        log.info("private, add ru.request {}, userId {}", requestId, userId);
-        return null;
+    @PostMapping
+    public ParticipationRequestDto addRequest(@PathVariable Long userId,
+                                              @RequestParam Long requestId) {
+        log.info("private, add request {}, userId {}", requestId, userId);
+        return service.addRequest(userId, requestId);
     }
 
-    @PostMapping("/{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable Integer userId,
-                                                 @PathVariable Integer requestId) {
-        log.info("private, cancel ru.request {}, userId {}", requestId, userId);
-        return null;
+    @PatchMapping("/{requestId}/cancel")
+    public ParticipationRequestDto cancelRequest(@PathVariable Long userId,
+                                                 @PathVariable Long requestId) {
+        log.info("private, cancel request {}, userId {}", requestId, userId);
+        return service.cancelRequest(userId, requestId);
     }
 
 }

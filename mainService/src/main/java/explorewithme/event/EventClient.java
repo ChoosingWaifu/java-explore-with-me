@@ -1,4 +1,7 @@
 package explorewithme.event;
 
-public interface EventService {
+public class EventClient {
 }
+
+
+

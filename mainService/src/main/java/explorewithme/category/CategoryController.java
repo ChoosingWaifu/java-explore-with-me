@@ -12,21 +12,24 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CategoryController {
 
+    private final CategoryService service;
+
     @PostMapping
     public CategoryDto addCategory(@RequestBody NewCategoryDto newCategory) {
-        log.info("create new ru.category {}", newCategory);
-        return null;
+        log.info("create new category {}", newCategory);
+        return service.addCategory(newCategory);
     }
 
     @PatchMapping
     public CategoryDto patchCategory(@RequestBody CategoryDto category) {
-        log.info("patch ru.category {}", category);
-        return null;
+        log.info("patch category {}", category);
+        return service.patchCategory(category);
     }
 
     @DeleteMapping("/{catId}")
     public void deleteCategory(@PathVariable Long catId) {
-        log.info("delete ru.category {}", catId);
+        log.info("delete category {}", catId);
+        service.deleteCategory(catId);
     }
 }
 

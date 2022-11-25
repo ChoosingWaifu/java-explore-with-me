@@ -25,12 +25,12 @@ public class NewEventDto {
     @Max(7000)
     private String description;
     @NotNull
-    private String eventDate;//"yyyy-MM-dd HH:mm:ss"
+    private String eventDate;
     @NotNull
     private Location location;
-    private Boolean paid;//default false
-    private Long participantLimit;//default(0)
-    private Boolean requestModeration;//default??
+    private Boolean paid;
+    private Long participantLimit;
+    private Boolean requestModeration;
     @NotNull
     @Min(3)
     @Max(120)

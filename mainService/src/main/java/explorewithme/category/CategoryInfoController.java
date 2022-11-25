@@ -1,13 +1,9 @@
 package explorewithme.category;
 
 import explorewithme.category.dto.CategoryDto;
-import explorewithme.compilation.dto.CompilationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,16 +13,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryInfoController {
 
+    private final CategoryInfoService service;
+
     @GetMapping
-    public List<CategoryDto> getCategories() {
+    public List<CategoryDto> getCategories(@RequestParam(defaultValue = "0") Integer from,
+                                           @RequestParam(defaultValue = "20") Integer size) {
         log.info("public, get categories");
-        return null;
+        return service.getCategories(from, size);
     }
 
     @GetMapping("/{catId}")
-    public CompilationDto getCategoryById(@PathVariable Integer catId) {
+    public CategoryDto getCategoryById(@PathVariable Long catId) {
         log.info("public, get ru.category by Id {}", catId);
-        return null;
+        return service.getCategoryById(catId);
     }
-
 }

@@ -9,7 +9,6 @@ import lombok.*;
 @ToString
 public class UserShortDto {
 
-    private Integer id;
     private String name;
     private String email;
 }

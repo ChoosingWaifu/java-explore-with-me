@@ -12,7 +12,7 @@ import java.util.List;
 @ToString
 public class CompilationDto {
 
-    private Integer id;
+    private Long id;
     private Boolean pinned;
     private String title;
 

@@ -16,5 +16,5 @@ public class NewCompilationDto {
     private String title;
     private Boolean pinned;//default false
 
-    private List<Integer> events;
+    private List<Long> events;
 }

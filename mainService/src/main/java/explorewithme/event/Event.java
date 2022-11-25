@@ -3,6 +3,7 @@ package explorewithme.event;
 import explorewithme.compilation.Compilation;
 import explorewithme.event.dto.EventState;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
@@ -30,33 +31,37 @@ public class Event {
     private String annotation;
     @NotNull
     private Long category;
+    @Column(name = "confirmed_requests")
     private Long confirmedRequests;
-    @NotNull
-    private String createdOn;
+    @Column(name = "created_on")
+    @CreationTimestamp
+    private LocalDateTime createdOn;
     @NotNull
     @Min(20)
     @Max(7000)
     private String description;
+    @Column(name = "event_date")
     @NotNull
     private LocalDateTime eventDate;//"yyyy-MM-dd HH:mm:ss"
     @NotNull
     private Long initiator;
     @NotNull
-    private Number lat;
+    private Float lat;
     @NotNull
-    private Number lon;
-    private Boolean paid;//default false
-    private Long participantLimit;//default(0)
-    @NotNull
+    private Float lon;
+    private Boolean paid;
+    @Column(name = "participant_limit")
+    private Long participantLimit;
+    @Column(name = "published_on")
     private LocalDateTime publishedOn;
-    private Boolean requestModeration;//default??
+    @Column(name = "request_moderation")
+    private Boolean requestModeration;
     @Enumerated(EnumType.STRING)
     private EventState state;
     @NotNull
     @Min(3)
     @Max(120)
     private String title;
-    private Long views;
 
     @ManyToMany(cascade = { CascadeType.ALL })
     @JoinTable(

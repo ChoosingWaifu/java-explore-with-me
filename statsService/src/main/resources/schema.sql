@@ -10,12 +10,7 @@ CREATE TABLE IF NOT EXISTS hits (
                                     app VARCHAR(100) NOT NULL,
                                     uri VARCHAR NOT NULL,
                                     ip VARCHAR NOT NULL,
-                                    timestamp TIMESTAMP NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS apps_hits (
-                                     app_id BIGINT NOT NULL,
-                                     hit_id BIGINT NOT NULL,
-                                     FOREIGN KEY (app_id) REFERENCES apps(id),
-                                     FOREIGN KEY (hit_id) REFERENCES hits(id)
+                                    timestamp TIMESTAMP NOT NULL,
+                                    app_id BIGINT NOT NULL,
+                                    FOREIGN KEY (app_id) REFERENCES apps(id)
 );

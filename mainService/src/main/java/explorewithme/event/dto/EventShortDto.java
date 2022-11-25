@@ -1,5 +1,6 @@
 package explorewithme.event.dto;
 
+import explorewithme.category.dto.CategoryDto;
 import explorewithme.user.dto.UserShortDto;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import lombok.*;
 public class EventShortDto {
 
     private String annotation;
-    private Long category;
+    private CategoryDto category;
     private Long confirmedRequests;
     private String eventDate;
     private Long id;

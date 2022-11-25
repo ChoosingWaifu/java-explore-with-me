@@ -2,6 +2,7 @@ package explorewithme.user.dto;
 
 import lombok.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @ToString
+@Valid
 public class NewUserRequest {
 
     @NotNull

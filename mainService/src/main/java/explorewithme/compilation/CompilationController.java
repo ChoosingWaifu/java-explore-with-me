@@ -12,36 +12,42 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CompilationController {
 
+    private final CompilationService service;
+
     @PostMapping
     public CompilationDto addCompilation(@RequestBody NewCompilationDto newCompilation) {
-        log.info("create new ru.compilation {}",newCompilation);
-        return null;
+        log.info("create new compilation {}", newCompilation);
+        return service.addCompilation(newCompilation);
     }
 
     @DeleteMapping("/{compId}")
     public void deleteCompilation(@PathVariable Long compId) {
-        log.info("delete ru.compilation {}", compId);
+        log.info("delete compilation {}", compId);
+        service.deleteCompilation(compId);
     }
 
     @PatchMapping("/{compId}/events/{eventId}")
-    public CompilationDto addEvent(@PathVariable Long compId, @PathVariable Long eventId) {
-        log.info("add ru.event {} to ru.compilation {}", eventId, compId);
-        return null;
+    public void addEvent(@PathVariable Long compId, @PathVariable Long eventId) {
+        log.info("add ru.event {} to compilation {}", eventId, compId);
+        service.addEvent(compId, eventId);
     }
 
     @DeleteMapping("/{compId}/events/{eventId}")
     public void deleteEvent(@PathVariable Long compId, @PathVariable Long eventId) {
-        log.info("delete ru.event {} from ru.compilation {}", eventId, compId);
+        log.info("delete ru.event {} from compilation {}", eventId, compId);
+        service.deleteEvent(compId, eventId);
     }
 
     @PatchMapping("/{compId}/pin")
     public void pinCompilation(@PathVariable Long compId) {
-        log.info("pin ru.compilation {}", compId);
+        log.info("pin compilation {}", compId);
+        service.pinCompilation(compId);
     }
 
     @DeleteMapping("/{compId}/pin")
     public void unpinCompilation(@PathVariable Long compId) {
-        log.info("unpin ru.compilation {}", compId);
+        log.info("unpin compilation {}", compId);
+        service.unpinCompilation(compId);
     }
 }
 

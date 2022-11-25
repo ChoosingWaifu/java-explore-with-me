@@ -1,12 +1,12 @@
 package explorewithme.user;
 
-import explorewithme.user.dto.UserShortDto;
+import explorewithme.user.dto.NewUserRequest;
+import explorewithme.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import explorewithme.user.dto.NewUserRequest;
-import explorewithme.user.dto.UserDto;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -15,19 +15,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
+    private final UserService service;
+
     @GetMapping
-    public List<UserDto> getUser() {
-        return null;
+    public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
+                                  @RequestParam(defaultValue = "0") Integer from,
+                                  @RequestParam(defaultValue = "20") Integer size) {
+        return service.getUsers(ids, from, size);
     }
 
     @PostMapping
-    public UserShortDto addUser(@RequestBody NewUserRequest newUser) {
-        log.info("create new ru.user {}", newUser);
-        return null;
+    public UserDto addUser(@RequestBody @Valid NewUserRequest newUser) {
+        log.info("create new user {}", newUser);
+        return service.addNewUser(newUser);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable Integer userId) {
-        log.info("delete ru.user {}", userId);
+    public void deleteUser(@PathVariable Long userId) {
+        log.info("delete user {}", userId);
+        service.deleteUser(userId);
     }
 }
