@@ -1,11 +1,12 @@
-package explorewithme.compilation;
+package explorewithme.compilation.admin;
 
+import explorewithme.compilation.Compilation;
+import explorewithme.compilation.CompilationRepository;
 import explorewithme.compilation.dto.CompilationDto;
 import explorewithme.compilation.dto.CompilationMapper;
 import explorewithme.compilation.dto.NewCompilationDto;
-import explorewithme.compilation.dto.RepoCompilationMapper;
 import explorewithme.event.Event;
-import explorewithme.event.EventRepository;
+import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,14 +25,12 @@ public class CompilationServiceImpl implements CompilationService {
 
     private final EventRepository eventRepository;
 
-    private final RepoCompilationMapper mapper;
-
     @Override
     public CompilationDto addCompilation(NewCompilationDto dto) {
         List<Event> events = eventRepository.findByIdIn(dto.getEvents());
         Compilation compilation = CompilationMapper.toCompilation(dto);
         compilation.setEvents(new HashSet<>(events));
-        return mapper.toCompilationDto(repository.save(compilation));
+        return CompilationMapper.toCompilationDto(repository.save(compilation));
     }
 
     @Override
@@ -46,9 +45,15 @@ public class CompilationServiceImpl implements CompilationService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("event not found"));
         Set<Event> events = compilation.getEvents();
+        log.info("before {}", events.size());
         events.add(event);
+        log.info("after add {}", events.size());
         compilation.setEvents(events);
+        log.info("comp get {}", compilation.getEvents().size());
         repository.save(compilation);
+        Set<Event>  check = repository.findById(compId)
+                .orElseThrow(() -> new NotFoundException("compilation not found")).getEvents();
+        log.info("check {}, {}", check.size(), check);
     }
 
     @Override

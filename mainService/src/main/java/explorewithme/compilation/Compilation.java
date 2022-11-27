@@ -25,6 +25,11 @@ public class Compilation {
     @NotNull
     private String title;
 
-    @ManyToMany(mappedBy = "compilations")
+    @ManyToMany(cascade = { CascadeType.ALL })
+    @JoinTable(
+            name = "compilations_events",
+            joinColumns = { @JoinColumn(name = "compilation_id") },
+            inverseJoinColumns = { @JoinColumn(name = "event_id")   }
+    )
     private Set<Event> events = new HashSet<>();
 }

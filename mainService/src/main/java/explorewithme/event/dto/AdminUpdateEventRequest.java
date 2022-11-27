@@ -1,6 +1,6 @@
 package explorewithme.event.dto;
 
-import explorewithme.event.location.Location;
+import explorewithme.event.dto.location.Location;
 import lombok.*;
 
 @Getter

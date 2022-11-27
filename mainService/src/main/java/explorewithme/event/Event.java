@@ -1,7 +1,8 @@
 package explorewithme.event;
 
-import explorewithme.compilation.Compilation;
+import explorewithme.category.Category;
 import explorewithme.event.dto.EventState;
+import explorewithme.user.User;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -10,8 +11,6 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -30,7 +29,9 @@ public class Event {
     @Max(2000)
     private String annotation;
     @NotNull
-    private Long category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
     @Column(name = "confirmed_requests")
     private Long confirmedRequests;
     @Column(name = "created_on")
@@ -42,9 +43,11 @@ public class Event {
     private String description;
     @Column(name = "event_date")
     @NotNull
-    private LocalDateTime eventDate;//"yyyy-MM-dd HH:mm:ss"
+    private LocalDateTime eventDate;
     @NotNull
-    private Long initiator;
+    @ManyToOne
+    @JoinColumn(name = "initiator_id")
+    private User initiator;
     @NotNull
     private Float lat;
     @NotNull
@@ -63,12 +66,5 @@ public class Event {
     @Max(120)
     private String title;
 
-    @ManyToMany(cascade = { CascadeType.ALL })
-    @JoinTable(
-            name = "compilations_events",
-            joinColumns = { @JoinColumn(name = "compilation_id") },
-            inverseJoinColumns = { @JoinColumn(name = "event_id")   }
-    )
-    private Set<Compilation> compilations = new HashSet<>();
 }
 

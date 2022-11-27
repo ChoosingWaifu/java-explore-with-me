@@ -1,5 +1,6 @@
 package explorewithme.event.info;
 
+import explorewithme.event.dto.EventFullDto;
 import explorewithme.event.dto.EventShortDto;
 import explorewithme.utility.DateTimeMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class EventInfoController {
     }
 
     @GetMapping("/{id}")
-    public EventShortDto getEventById(@PathVariable Long id) {
+    public EventFullDto getEventById(@PathVariable Long id) {
         log.info("public, get event by Id {}", id);
         return service.getById(id);
     }

@@ -1,6 +1,6 @@
-package explorewithme.event;
+package explorewithme.event.repository;
 
-import org.springframework.data.domain.Page;
+import explorewithme.event.Event;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +11,7 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event, Long>, CustomEventRepository {
 
     @Override
-    Page<Event> infoFindEventsBy(String text,
+    List<Event> infoFindEventsBy(String text,
                                  List<Long> categories,
                                  Boolean paid,
                                  LocalDateTime rangeStart, LocalDateTime rangeEnd,
@@ -19,9 +19,17 @@ public interface EventRepository extends JpaRepository<Event, Long>, CustomEvent
                                  String sort,
                                  Integer size, Integer from);
 
-    List<Event> findByCategoryIs(Long category);
+    @Override
+    List<Event> adminFindEventsBy(List<String> states,
+                                    List<Long> categories,
+                                    LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                    Integer size, Integer from);
 
-    List<Event> findByInitiatorIs(Long userId, Pageable pageable);
+    List<Event> findByCategory_IdIs(Long category);
+
+    List<Event> findByInitiator_IdIs(Long userId, Pageable pageable);
+
+    List<Event> findByInitiator_IdIn(@Param("ids") List<Long> ids);
 
     List<Event> findByIdIn(@Param("ids") List<Long> ids);
 }

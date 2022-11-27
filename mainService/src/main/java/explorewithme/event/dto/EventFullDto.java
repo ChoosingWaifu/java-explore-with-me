@@ -1,7 +1,7 @@
 package explorewithme.event.dto;
 
 import explorewithme.category.dto.CategoryDto;
-import explorewithme.event.location.Location;
+import explorewithme.event.dto.location.Location;
 import explorewithme.user.dto.UserShortDto;
 import lombok.*;
 
@@ -27,5 +27,5 @@ public class EventFullDto {
     private Boolean requestModeration;
     private EventState state;
     private String title;
-    private Long views; //from stats server
+    private Long views;
 }

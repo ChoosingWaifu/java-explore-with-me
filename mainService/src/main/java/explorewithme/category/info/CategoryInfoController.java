@@ -1,4 +1,4 @@
-package explorewithme.category;
+package explorewithme.category.info;
 
 import explorewithme.category.dto.CategoryDto;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class CategoryInfoController {
 
     @GetMapping("/{catId}")
     public CategoryDto getCategoryById(@PathVariable Long catId) {
-        log.info("public, get ru.category by Id {}", catId);
+        log.info("public, get category by Id {}", catId);
         return service.getCategoryById(catId);
     }
 }

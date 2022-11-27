@@ -1,8 +1,13 @@
 package explorewithme.event.admin;
 
+import explorewithme.category.Category;
+import explorewithme.category.CategoryRepository;
 import explorewithme.event.Event;
-import explorewithme.event.EventRepository;
-import explorewithme.event.dto.*;
+import explorewithme.event.dto.AdminUpdateEventRequest;
+import explorewithme.event.dto.EventFullDto;
+import explorewithme.event.dto.EventMapper;
+import explorewithme.event.dto.EventState;
+import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.InsufficientRightsException;
 import explorewithme.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -20,7 +24,7 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository repository;
 
-    private final RepoEventMapper mapper;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<EventFullDto> getEvents(List<Long> users,
@@ -28,11 +32,13 @@ public class EventServiceImpl implements EventService {
                                         List<Long> categories,
                                         LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                         Integer size, Integer from) {
+        log.info("admin service, get events {}, {}, {}, {}, {}, {}, {}", users, states, categories, rangeStart, rangeEnd, size, from);
         if (users != null) {
-            return mapper.toListEventFullDto(repository.findByIdIn(users));
+            log.info("find by initiator id in {}", users);
+            return EventMapper.toListEventFullDto(repository.findByInitiator_IdIn(users));
         }
-        return mapper.toListEventFullDto(repository.privateFindEventsBy(states, categories, rangeStart, rangeEnd, size, from)
-                .stream().collect(Collectors.toList()));
+        log.info("admin find events by params");
+        return EventMapper.toListEventFullDto(repository.adminFindEventsBy(states, categories, rangeStart, rangeEnd, size, from));
     }
 
     @Override
@@ -43,7 +49,12 @@ public class EventServiceImpl implements EventService {
             throw new InsufficientRightsException("event is canceled");
         }
         Event result = EventMapper.adminUpdateEvent(event, updateRequest);
-        return mapper.toEventFullDto(repository.save(result));
+        Long categoryId = updateRequest.getCategory() == null ? event.getCategory().getId() : updateRequest.getCategory();
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("category not found"));
+        result.setCategory(category);
+        log.info("update event {}", result);
+        return EventMapper.toEventFullDto(repository.save(result));
     }
 
     @Override
@@ -58,7 +69,8 @@ public class EventServiceImpl implements EventService {
         }
         event.setState(EventState.PUBLISHED);
         event.setPublishedOn(LocalDateTime.now());
-        return mapper.toEventFullDto(repository.save(event));
+        log.info("publish event {}", event);
+        return EventMapper.toEventFullDto(repository.save(event));
     }
 
     @Override
@@ -68,7 +80,8 @@ public class EventServiceImpl implements EventService {
         if (!event.getState().equals(EventState.PENDING)) {
             throw new InsufficientRightsException("event must be in pending state");
         }
-        event.setState(EventState.REJECTED);
-        return mapper.toEventFullDto(repository.save(event));
+        event.setState(EventState.CANCELED);
+        log.info("reject event {}", event);
+        return EventMapper.toEventFullDto(repository.save(event));
     }
 }

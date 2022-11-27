@@ -1,5 +1,6 @@
 package explorewithme.event.info;
 
+import explorewithme.event.dto.EventFullDto;
 import explorewithme.event.dto.EventShortDto;
 
 import java.time.LocalDateTime;
@@ -15,5 +16,5 @@ public interface EventInfoService {
                                   String sort,
                                   Integer size, Integer from);
 
-    EventShortDto getById(Long eventId);
+    EventFullDto getById(Long eventId);
 }

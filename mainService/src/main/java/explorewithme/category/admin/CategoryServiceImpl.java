@@ -1,9 +1,12 @@
-package explorewithme.category;
+package explorewithme.category.admin;
 
+import explorewithme.category.Category;
+import explorewithme.category.CategoryRepository;
 import explorewithme.category.dto.CategoryDto;
 import explorewithme.category.dto.CategoryMapper;
 import explorewithme.category.dto.NewCategoryDto;
-import explorewithme.event.EventRepository;
+import explorewithme.event.repository.EventRepository;
+import explorewithme.exceptions.DbConflictException;
 import explorewithme.exceptions.InsufficientRightsException;
 import explorewithme.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,15 +24,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto addCategory(NewCategoryDto dto) {
+        checkForUnique(dto.getName());
         Category category = CategoryMapper.toCategory(dto);
+        log.info("add cat {}", dto);
         return CategoryMapper.toCategoryDto(repository.save(category));
     }
 
     @Override
     public CategoryDto patchCategory(CategoryDto dto) {
+        checkForUnique(dto.getName());
         repository.findById(dto.getId())
                 .orElseThrow(() -> new NotFoundException("category not found"));
         Category category = CategoryMapper.toCategory(dto);
+        log.info("patch cat {}", dto);
         return CategoryMapper.toCategoryDto(repository.save(category));
     }
 
@@ -37,9 +44,16 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long catId) {
         repository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("category not found"));
-        if (!eventRepository.findByCategoryIs(catId).isEmpty()) {
+        if (!eventRepository.findByCategory_IdIs(catId).isEmpty()) {
             throw new InsufficientRightsException("can't delete category with events");
         }
+        log.info("delete cat {}", catId);
         repository.deleteById(catId);
+    }
+
+    private void checkForUnique(String name) {
+        if (repository.findByNameIs(name) != null) {
+            throw new DbConflictException("unique constraint violation");
+        }
     }
 }

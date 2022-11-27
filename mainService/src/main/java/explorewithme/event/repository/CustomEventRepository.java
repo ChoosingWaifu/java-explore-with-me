@@ -1,6 +1,6 @@
-package explorewithme.event;
+package explorewithme.event.repository;
 
-import org.springframework.data.domain.Page;
+import explorewithme.event.Event;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface CustomEventRepository {
 
-    Page<Event> infoFindEventsBy(String text,
+    List<Event> infoFindEventsBy(String text,
                                  List<Long> categories,
                                  Boolean paid,
                                  LocalDateTime rangeStart, LocalDateTime rangeEnd,
@@ -17,7 +17,7 @@ public interface CustomEventRepository {
                                  String sort,
                                  Integer size, Integer from);
 
-    Page<Event> privateFindEventsBy(List<String> states,
+    List<Event> adminFindEventsBy(List<String> states,
                                     List<Long> categories,
                                     LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                     Integer size, Integer from);

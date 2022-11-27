@@ -1,4 +1,4 @@
-package explorewithme.compilation;
+package explorewithme.compilation.admin;
 
 import explorewithme.compilation.dto.CompilationDto;
 import explorewithme.compilation.dto.NewCompilationDto;

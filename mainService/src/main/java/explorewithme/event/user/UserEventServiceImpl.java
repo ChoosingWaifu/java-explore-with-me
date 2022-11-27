@@ -1,8 +1,11 @@
 package explorewithme.event.user;
 
+import explorewithme.category.Category;
+import explorewithme.category.CategoryRepository;
 import explorewithme.event.Event;
-import explorewithme.event.EventRepository;
+import explorewithme.event.repository.EventRepository;
 import explorewithme.event.dto.*;
+import explorewithme.exceptions.InsufficientRightsException;
 import explorewithme.exceptions.NotFoundException;
 import explorewithme.pagination.PageFromRequest;
 import explorewithme.request.ParticipationRequest;
@@ -10,11 +13,14 @@ import explorewithme.request.RequestRepository;
 import explorewithme.request.dto.ParticipationRequestDto;
 import explorewithme.request.dto.RequestMapper;
 import explorewithme.request.dto.RequestStatus;
+import explorewithme.user.User;
+import explorewithme.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -24,60 +30,103 @@ public class UserEventServiceImpl implements UserEventService {
 
     private final EventRepository repository;
 
-    private final RequestRepository requestRepository;
+    private final UserRepository userRepository;
 
-    private final RepoEventMapper mapper;
+    private final CategoryRepository categoryRepository;
+
+    private final RequestRepository requestRepository;
 
     @Override
     public List<EventShortDto> getEvents(Long userId, Integer from, Integer size) {
         Pageable pageable = PageFromRequest.of(from, size);
-        return EventMapper.toListEventShortDto(repository.findByInitiatorIs(userId, pageable));
+        log.info("private service, get events {}, {}, {}", userId, size, from);
+        return EventMapper.toListEventShortDto(repository.findByInitiator_IdIs(userId, pageable));
     }
 
     @Override
     public EventFullDto addEvent(Long userId, NewEventDto dto) {
-        Event event = EventMapper.newEvent(dto, userId);
+        Event event = EventMapper.newEvent(dto);
+        if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
+            throw new InsufficientRightsException("invalid date, need at least 2h before event date");
+        }
+        Category category = categoryRepository.findById(dto.getCategory())
+                .orElseThrow(() -> new NotFoundException("category not found"));
+        event.setCategory(category);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user not found"));
+        event.setInitiator(user);
         log.info("private service, add event {}", event);
-        return mapper.toEventFullDto(repository.save(event));
+        return EventMapper.toEventFullDto(repository.save(event));
     }
 
     @Override
     public EventFullDto updateEvent(Long userId, UpdateEventRequest updateRequest) {
         Event event = repository.findById(updateRequest.getEventId())
                 .orElseThrow(() -> new NotFoundException("event not found"));
-        log.info("user, update event {}, event {}", updateRequest.getEventId(), event);
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new InsufficientRightsException("can't patch other's events");
+        }
+        if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
+            throw new InsufficientRightsException("too late to patch event info (2h)");
+        }
+        if (event.getState().equals(EventState.PUBLISHED)) {
+            throw new InsufficientRightsException("can't patch published events");
+        }
         Event result = EventMapper.updateEvent(event, updateRequest);
-        return mapper.toEventFullDto(repository.save(result));
+        if (event.getState().equals(EventState.CANCELED)) {
+            result.setState(EventState.PENDING);
+        }
+        Long categoryId = updateRequest.getCategory() == null ? event.getCategory().getId() : updateRequest.getCategory();
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("category not found"));
+        result.setCategory(category);
+        log.info("private service, update event with {}", updateRequest);
+        return EventMapper.toEventFullDto(repository.save(result));
     }
 
     @Override
     public EventFullDto getById(Long userId, Long eventId) {
         Event event = repository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("event not found"));
-        return mapper.toEventFullDto(event);
+        log.info("private service, get by id {}", eventId);
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
     public EventFullDto cancelEvent(Long userId, Long eventId) {
         Event event = repository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("event not found"));
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new InsufficientRightsException("can't cancel other's events");
+        }
+        if (!event.getState().equals(EventState.PENDING)) {
+            throw new InsufficientRightsException("only events in pending state could be cancelled");
+        }
         event.setState(EventState.CANCELED);
         repository.save(event);
-        return mapper.toEventFullDto(event);
+        log.info("private service, cancel event {}", eventId);
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
     public List<ParticipationRequestDto> getRequests(Long userId, Long eventId) {
         List<ParticipationRequest> requests = requestRepository.findByEventIs(eventId);
+        log.info("private service, get requests {}", eventId);
         return RequestMapper.toRequestDtoList(requests);
     }
 
     @Override
     public ParticipationRequestDto confirmRequest(Long userId, Long eventId, Long requestId) {
+        Event event = repository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("event not found"));
         ParticipationRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("request not found"));
         request.setStatus(RequestStatus.CONFIRMED);
+        if (event.getParticipantLimit() <= requestRepository.findByEventIs(eventId).size()) {
+            throw new InsufficientRightsException("too many requests to confirm");
+        }
         requestRepository.save(request);
+        log.info("private service, confirm request {}", requestId);
         return RequestMapper.toRequestDto(request);
     }
 
@@ -87,6 +136,7 @@ public class UserEventServiceImpl implements UserEventService {
                 .orElseThrow(() -> new NotFoundException("request not found"));
         request.setStatus(RequestStatus.REJECTED);
         requestRepository.save(request);
+        log.info("private service, reject request {}", requestId);
         return RequestMapper.toRequestDto(request);
     }
 }

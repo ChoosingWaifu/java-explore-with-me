@@ -11,7 +11,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping(path = "/users/{userId}/requests")
 @RequiredArgsConstructor
-public class UserRequestController {
+public class RequestController {
 
     private final RequestService service;
 
@@ -23,9 +23,9 @@ public class UserRequestController {
 
     @PostMapping
     public ParticipationRequestDto addRequest(@PathVariable Long userId,
-                                              @RequestParam Long requestId) {
-        log.info("private, add request {}, userId {}", requestId, userId);
-        return service.addRequest(userId, requestId);
+                                              @RequestParam Long eventId) {
+        log.info("private, add request for event {}, userId {}", eventId, userId);
+        return service.addRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")

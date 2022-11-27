@@ -1,10 +1,12 @@
-package explorewithme.compilation;
+package explorewithme.compilation.admin;
 
 import explorewithme.compilation.dto.CompilationDto;
 import explorewithme.compilation.dto.NewCompilationDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @Slf4j
@@ -15,7 +17,7 @@ public class CompilationController {
     private final CompilationService service;
 
     @PostMapping
-    public CompilationDto addCompilation(@RequestBody NewCompilationDto newCompilation) {
+    public CompilationDto addCompilation(@RequestBody @Valid NewCompilationDto newCompilation) {
         log.info("create new compilation {}", newCompilation);
         return service.addCompilation(newCompilation);
     }

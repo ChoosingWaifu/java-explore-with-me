@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -35,7 +36,7 @@ public class UserEventController {
     }
 
     @PostMapping
-    public EventFullDto addEvent(@RequestBody NewEventDto newEventDto,
+    public EventFullDto addEvent(@RequestBody @Valid NewEventDto newEventDto,
                                  @PathVariable Long userId) {
         log.info("private, add event {}, userId {}", newEventDto, userId);
         return service.addEvent(userId, newEventDto);

@@ -1,4 +1,4 @@
-package explorewithme.event.location;
+package explorewithme.event.dto.location;
 
 import lombok.*;
 

@@ -1,5 +1,9 @@
 package explorewithme.request;
 
+import explorewithme.event.Event;
+import explorewithme.event.repository.EventRepository;
+import explorewithme.exceptions.InsufficientRightsException;
+import explorewithme.exceptions.NotFoundException;
 import explorewithme.request.dto.ParticipationRequestDto;
 import explorewithme.request.dto.RequestMapper;
 import explorewithme.request.dto.RequestStatus;
@@ -17,14 +21,29 @@ public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository repository;
 
+    private final EventRepository eventRepository;
+
     @Override
-    public ParticipationRequestDto addRequest(Long userId, Long requestId) {
-        ParticipationRequest request = RequestMapper.newRequest(userId, requestId);
+    public ParticipationRequestDto addRequest(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("event not found"));
+        if (userId.equals(event.getInitiator().getId())) {
+            throw new InsufficientRightsException("can't request for own event");
+        }
+        if (event.getPublishedOn() == null) {
+            throw new InsufficientRightsException("event should be published");
+        }
+        ParticipationRequest request = RequestMapper.newRequest(userId, eventId);
+        if (!event.getRequestModeration()) {
+            request.setStatus(RequestStatus.CONFIRMED);
+        }
+        log.info("request service, add request user {} for event {}", userId, eventId);
         return RequestMapper.toRequestDto(repository.save(request));
     }
 
     @Override
     public List<ParticipationRequestDto> getRequests(Long userId) {
+        log.info("request service, get requests for user {}", userId);
         return RequestMapper.toRequestDtoList(repository.findByRequesterIs(userId));
     }
 

@@ -1,6 +1,7 @@
 package explorewithme.request.dto;
 
 import explorewithme.request.ParticipationRequest;
+import explorewithme.utility.DateTimeMapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,20 +18,10 @@ public class RequestMapper {
         );
     }
 
-    public static ParticipationRequest toRequest(ParticipationRequestDto dto) {
-        return new ParticipationRequest(
-            null,
-            null,
-            dto.getEvent(),
-            dto.getRequester(),
-            dto.getStatus()
-        );
-    }
-
     public static ParticipationRequestDto toRequestDto(ParticipationRequest request) {
         return new ParticipationRequestDto(
                 request.getId(),
-                request.getCreated(),
+                request.getCreated().format(DateTimeMapper.format()),
                 request.getEvent(),
                 request.getRequester(),
                 request.getStatus()

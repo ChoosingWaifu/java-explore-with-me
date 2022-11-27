@@ -1,5 +1,6 @@
 package explorewithme.user;
 
+import explorewithme.exceptions.DbConflictException;
 import explorewithme.exceptions.NotFoundException;
 import explorewithme.pagination.PageFromRequest;
 import explorewithme.user.dto.NewUserRequest;
@@ -22,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addNewUser(NewUserRequest userRequest) {
+        checkForUnique(userRequest.getName());
         User user = UserMapper.toUser(userRequest);
         log.info("service create new user {}", user);
         return UserMapper.toUserDto(repository.save(user));
@@ -46,5 +48,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long userId) {
         repository.deleteById(userId);
+    }
+
+    private void checkForUnique(String name) {
+        if (repository.findByNameIs(name) != null) {
+            throw new DbConflictException("name is already in use");
+        }
     }
 }

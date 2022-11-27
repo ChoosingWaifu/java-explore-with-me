@@ -1,4 +1,4 @@
-package explorewithme.compilation;
+package explorewithme.compilation.info;
 
 import explorewithme.compilation.dto.CompilationDto;
 import lombok.RequiredArgsConstructor;

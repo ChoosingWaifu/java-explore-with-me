@@ -1,7 +1,9 @@
-package explorewithme.compilation;
+package explorewithme.compilation.info;
 
+import explorewithme.compilation.Compilation;
+import explorewithme.compilation.CompilationRepository;
 import explorewithme.compilation.dto.CompilationDto;
-import explorewithme.compilation.dto.RepoCompilationMapper;
+import explorewithme.compilation.dto.CompilationMapper;
 import explorewithme.exceptions.NotFoundException;
 import explorewithme.pagination.PageFromRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +19,6 @@ public class CompilationInfoServiceImpl implements CompilationInfoService {
 
     private final CompilationRepository repository;
 
-    private final RepoCompilationMapper mapper;
-
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         List<Compilation> result;
@@ -28,12 +28,12 @@ public class CompilationInfoServiceImpl implements CompilationInfoService {
             Pageable pageable = PageFromRequest.of(from, size);
             result = repository.findAll(pageable).toList();
         }
-        return result.stream().map(mapper::toCompilationDto).collect(Collectors.toList());
+        return result.stream().map(CompilationMapper::toCompilationDto).collect(Collectors.toList());
     }
 
     @Override
     public CompilationDto getCompilationById(Long compId) {
-        return mapper.toCompilationDto(repository.findById(compId)
+        return CompilationMapper.toCompilationDto(repository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("compilation not found")));
     }
 }

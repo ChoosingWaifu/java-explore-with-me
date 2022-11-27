@@ -1,4 +1,4 @@
-package explorewithme.category;
+package explorewithme.category.info;
 
 import explorewithme.category.dto.CategoryDto;
 

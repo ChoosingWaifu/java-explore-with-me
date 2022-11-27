@@ -1,25 +1,24 @@
 package explorewithme.event.info;
 
 import explorewithme.event.Event;
-import explorewithme.event.EventRepository;
+import explorewithme.event.dto.EventFullDto;
+import explorewithme.event.dto.EventMapper;
+import explorewithme.event.repository.EventRepository;
 import explorewithme.event.dto.EventShortDto;
-import explorewithme.event.dto.RepoEventMapper;
 import explorewithme.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventInfoServiceImpl implements EventInfoService {
 
     private final EventRepository repository;
-
-    private final RepoEventMapper mapper;
 
     @Override
     public List<EventShortDto> getEvents(String text,
@@ -29,15 +28,17 @@ public class EventInfoServiceImpl implements EventInfoService {
                                          Boolean onlyAvailable,
                                          String sort,
                                          Integer size, Integer from) {
-        Page<Event> events = repository.infoFindEventsBy(text, categories, paid,
+        List<Event> events = repository.infoFindEventsBy(text, categories, paid,
                                                          rangeStart, rangeEnd, onlyAvailable, sort, size, from);
-        return mapper.toListEventShortDto(events.stream().collect(Collectors.toList()));
+        log.info("info, get events by params");
+        return EventMapper.toListEventShortDto(events);
     }
 
     @Override
-    public EventShortDto getById(Long eventId) {
+    public EventFullDto getById(Long eventId) {
         Event event = repository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("event not found"));
-        return mapper.toEventShortDto(event);
+        log.info("info, get event by id  {}", eventId);
+        return EventMapper.toEventFullDto(event);
     }
 }
