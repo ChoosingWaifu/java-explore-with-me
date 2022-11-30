@@ -35,7 +35,8 @@ public class EventClient extends BaseClient {
     }
 
     public void sendHitToStats(NewHit newHit) {
-       post("/hit", null, null, newHit);
+       ResponseEntity<Object> result = post("/hit", newHit);
+       log.info("result {}", result);
     }
 
     public ResponseEntity<Object> getStats(String start, String end, List<String> uris, Boolean unique) {
@@ -49,7 +50,7 @@ public class EventClient extends BaseClient {
                 "uris", uris,
                 "unique", unique
         );
-        return get("/stats" + "?start={start}&end={end}&uris={uris}&unique={unique}",null, parameters);
+        return get("/stats" + "?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
     }
 
     public Long getViews(Event event) {
@@ -92,6 +93,7 @@ public class EventClient extends BaseClient {
                 }
             }
         }
+        log.info("add views");
         return events;
     }
 
@@ -118,6 +120,7 @@ public class EventClient extends BaseClient {
                 }
             }
         }
+        log.info("add views s");
         return events;
     }
 }

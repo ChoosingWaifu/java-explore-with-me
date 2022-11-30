@@ -9,8 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -34,9 +32,7 @@ public class StatsController {
                                            @RequestParam(defaultValue = "false") Boolean unique
                                           ) {
         log.info("controller, get stats {}, {}, {}, {}", uris, unique, start, end);
-        String startDecoded = URLDecoder.decode(start, StandardCharsets.UTF_8);
-        String endDecoded = URLDecoder.decode(start, StandardCharsets.UTF_8);
-        List<ViewStats> viewStatsList = service.getStats(uris, unique, startDecoded, endDecoded);
+        List<ViewStats> viewStatsList = service.getStats(uris, unique, start, end);
         return new ResponseEntity<>(viewStatsList, HttpStatus.OK);
     }
 }

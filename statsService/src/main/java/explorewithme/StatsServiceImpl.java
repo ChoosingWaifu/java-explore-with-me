@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,27 +34,30 @@ public class StatsServiceImpl implements StatsService {
                                     Boolean unique,
                                     String start,
                                     String end) {
-     /*   log.info("start coded on stats {}", start);
         start = URLDecoder.decode(start, StandardCharsets.UTF_8);
         log.info("start decoded {}", start);
-        end = URLDecoder.decode(end, StandardCharsets.UTF_8);*/
-        log.info("start {}", start);
+        end = URLDecoder.decode(end, StandardCharsets.UTF_8);
         LocalDateTime startTime = DateTimeMapper.toLocalDateTime(start);
         LocalDateTime endTime = DateTimeMapper.toLocalDateTime(end);
         List<ViewStats> result;
         if (uris != null) {
             if (unique) {
                 result = repository.getWithUrisUnique(startTime, endTime, uris);
+                log.info("u nn");
             } else {
                 result = repository.getWithUris(startTime, endTime, uris);
+                log.info("nn");
             }
         } else {
             if (unique) {
                 result = repository.getWithoutUrisUnique(startTime, endTime);
+                log.info("u n");
             } else {
                 result = repository.getWithoutUris(startTime, endTime);
+                log.info("n");
             }
         }
+        log.info("result {}", result);
         return result;
     }
 }
