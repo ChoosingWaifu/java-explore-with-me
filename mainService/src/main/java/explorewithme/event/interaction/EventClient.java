@@ -33,6 +33,7 @@ public class EventClient extends BaseClient {
                 .build()
         );
     }
+
     public void sendHitToStats(NewHit newHit) {
        post("/hit", null, null, newHit);
     }
