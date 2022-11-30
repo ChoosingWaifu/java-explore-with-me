@@ -3,6 +3,7 @@ package explorewithme.event.user;
 import explorewithme.category.Category;
 import explorewithme.category.CategoryRepository;
 import explorewithme.event.Event;
+import explorewithme.event.interaction.EventClient;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.event.dto.*;
 import explorewithme.exceptions.InsufficientRightsException;
@@ -36,11 +37,17 @@ public class UserEventServiceImpl implements UserEventService {
 
     private final RequestRepository requestRepository;
 
+    private final EventClient client;
+
     @Override
     public List<EventShortDto> getEvents(Long userId, Integer from, Integer size) {
         Pageable pageable = PageFromRequest.of(from, size);
         log.info("private service, get events {}, {}, {}", userId, size, from);
-        return EventMapper.toListEventShortDto(repository.findByInitiator_IdIs(userId, pageable));
+        List<EventShortDto> result = EventMapper.toListEventShortDto(repository.findByInitiator_IdIs(userId, pageable));
+        for (EventShortDto event: result) {
+            event.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(event.getId(), RequestStatus.CONFIRMED));
+        }
+        return client.addViewsShort(result);
     }
 
     @Override
@@ -89,7 +96,10 @@ public class UserEventServiceImpl implements UserEventService {
         Event event = repository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("event not found"));
         log.info("private service, get by id {}", eventId);
-        return EventMapper.toEventFullDto(event);
+        EventFullDto result = EventMapper.toEventFullDto(event);
+        result.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(eventId, RequestStatus.CONFIRMED));
+        result.setViews(client.getViews(event));
+        return result;
     }
 
     @Override

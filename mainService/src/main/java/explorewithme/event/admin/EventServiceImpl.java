@@ -7,9 +7,12 @@ import explorewithme.event.dto.AdminUpdateEventRequest;
 import explorewithme.event.dto.EventFullDto;
 import explorewithme.event.dto.EventMapper;
 import explorewithme.event.dto.EventState;
+import explorewithme.event.interaction.EventClient;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.InsufficientRightsException;
 import explorewithme.exceptions.NotFoundException;
+import explorewithme.request.RequestRepository;
+import explorewithme.request.dto.RequestStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +27,11 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository repository;
 
+    private final RequestRepository requestRepository;
+
     private final CategoryRepository categoryRepository;
+
+    private final EventClient client;
 
     @Override
     public List<EventFullDto> getEvents(List<Long> users,
@@ -33,12 +40,18 @@ public class EventServiceImpl implements EventService {
                                         LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                         Integer size, Integer from) {
         log.info("admin service, get events {}, {}, {}, {}, {}, {}, {}", users, states, categories, rangeStart, rangeEnd, size, from);
+        List<EventFullDto> result;
         if (users != null) {
             log.info("find by initiator id in {}", users);
-            return EventMapper.toListEventFullDto(repository.findByInitiator_IdIn(users));
+            result = EventMapper.toListEventFullDto(repository.findByInitiator_IdIn(users));
+        } else {
+            log.info("admin find events by params");
+            result = EventMapper.toListEventFullDto(repository.adminFindEventsBy(states, categories, rangeStart, rangeEnd, size, from));
         }
-        log.info("admin find events by params");
-        return EventMapper.toListEventFullDto(repository.adminFindEventsBy(states, categories, rangeStart, rangeEnd, size, from));
+        for (EventFullDto event: result) {
+            event.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(event.getId(), RequestStatus.CONFIRMED));
+        }
+        return client.addViews(result);
     }
 
     @Override
@@ -84,4 +97,5 @@ public class EventServiceImpl implements EventService {
         log.info("reject event {}", event);
         return EventMapper.toEventFullDto(repository.save(event));
     }
+
 }
