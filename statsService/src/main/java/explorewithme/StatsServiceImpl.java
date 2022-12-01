@@ -34,19 +34,26 @@ public class StatsServiceImpl implements StatsService {
                                     Boolean unique,
                                     String start,
                                     String end) {
+        log.info("stats enter param {}, {}, {}, {}", start, end, uris, unique);
+        if (uris.size() != 0) {
+            String[] eventsUris = uris.get(0).split(" ");
+            uris = List.of(eventsUris);
+        }
         start = URLDecoder.decode(start, StandardCharsets.UTF_8);
-        log.info("start decoded {}", start);
         end = URLDecoder.decode(end, StandardCharsets.UTF_8);
         LocalDateTime startTime = DateTimeMapper.toLocalDateTime(start);
         LocalDateTime endTime = DateTimeMapper.toLocalDateTime(end);
         List<ViewStats> result;
-        if (uris != null) {
+        if (uris.size() != 0) {
             if (unique) {
                 result = repository.getWithUrisUnique(startTime, endTime, uris);
                 log.info("u nn");
             } else {
+                log.info("params enter {}, {}, {}", uris, startTime, endTime);
                 result = repository.getWithUris(startTime, endTime, uris);
+                log.info("stats s {}", repository.getHitsWithUris("/events/84", startTime, endTime));
                 log.info("nn");
+                log.info("result {}", result);
             }
         } else {
             if (unique) {

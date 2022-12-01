@@ -47,7 +47,7 @@ public class UserEventServiceImpl implements UserEventService {
         for (EventShortDto event: result) {
             event.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(event.getId(), RequestStatus.CONFIRMED));
         }
-        return client.addViewsShort(result);
+        return result;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class UserEventServiceImpl implements UserEventService {
         log.info("private service, get by id {}", eventId);
         EventFullDto result = EventMapper.toEventFullDto(event);
         result.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(eventId, RequestStatus.CONFIRMED));
-        result.setViews(client.getViews(event));
+        result.setViews(client.addViews(event));
         return result;
     }
 

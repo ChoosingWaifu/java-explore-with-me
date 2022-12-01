@@ -44,7 +44,7 @@ public class EventInfoServiceImpl implements EventInfoService {
         for (EventShortDto event: result) {
             event.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(event.getId(), RequestStatus.CONFIRMED));
         }
-        result = client.addViewsShort(result);
+        result = client.addViewsList(result);
         if (sort != null) {
             result = result.stream()
                     .sorted(Comparator.comparing(EventShortDto::getViews)
@@ -62,7 +62,7 @@ public class EventInfoServiceImpl implements EventInfoService {
         Long requests = requestRepository.countByEventIsAndStatusIs(eventId, RequestStatus.CONFIRMED);
         log.info("requests {}", requests);
         result.setConfirmedRequests(requests);
-        result.setViews(client.getViews(event));
+        result.setViews(client.addViews(event));
         return result;
     }
 

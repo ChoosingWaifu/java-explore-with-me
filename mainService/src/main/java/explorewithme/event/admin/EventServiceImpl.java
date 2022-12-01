@@ -7,7 +7,6 @@ import explorewithme.event.dto.AdminUpdateEventRequest;
 import explorewithme.event.dto.EventFullDto;
 import explorewithme.event.dto.EventMapper;
 import explorewithme.event.dto.EventState;
-import explorewithme.event.interaction.EventClient;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.InsufficientRightsException;
 import explorewithme.exceptions.NotFoundException;
@@ -31,8 +30,6 @@ public class EventServiceImpl implements EventService {
 
     private final CategoryRepository categoryRepository;
 
-    private final EventClient client;
-
     @Override
     public List<EventFullDto> getEvents(List<Long> users,
                                         List<String> states,
@@ -51,7 +48,7 @@ public class EventServiceImpl implements EventService {
         for (EventFullDto event: result) {
             event.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(event.getId(), RequestStatus.CONFIRMED));
         }
-        return client.addViews(result);
+        return result;
     }
 
     @Override
