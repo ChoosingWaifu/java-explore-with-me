@@ -2,7 +2,7 @@ package explorewithme.errors;
 
 import explorewithme.exceptions.DbConflictException;
 import explorewithme.exceptions.InsufficientRightsException;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.NotFoundException;
 import explorewithme.utility.DateTimeMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

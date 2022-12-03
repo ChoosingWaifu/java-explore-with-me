@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface StatsRepository extends JpaRepository<Hit, Long> {
+public interface HitRepository extends JpaRepository<Hit, Long> {
 
     @Query("select new explorewithme.dto.ViewStats(hit.app, hit.uri, count(distinct hit.ip))"
             + " from Hit hit"
@@ -24,13 +24,6 @@ public interface StatsRepository extends JpaRepository<Hit, Long> {
             + " and hit.uri in :uris"
             + " group by hit.app, hit.uri")
     List<ViewStats> getWithUris(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end, @Param("uris") List<String> uris);
-
-    @Query("select hit from Hit hit"
-            + " where hit.uri in ?1"
-            + " and hit.timestamp between ?2 and ?3 "
-            + " group by hit.app, hit.uri, hit.id")
-    List<Hit> getHitsWithUris(String uris, LocalDateTime start, LocalDateTime end);
-
 
     @Query("select new explorewithme.dto.ViewStats(hit.app, hit.uri, count(distinct hit.ip))"
             + " from Hit hit"

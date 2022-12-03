@@ -21,15 +21,15 @@ public interface EventRepository extends JpaRepository<Event, Long>, CustomEvent
 
     @Override
     List<Event> adminFindEventsBy(List<String> states,
-                                    List<Long> categories,
-                                    LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                    Integer size, Integer from);
+                                  List<Long> categories,
+                                  LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                  Integer size, Integer from);
 
-    List<Event> findByCategory_IdIs(Long category);
+    List<Event> findByCategoryIdIs(Long categoryId);
 
-    List<Event> findByInitiator_IdIs(Long userId, Pageable pageable);
+    List<Event> findByInitiatorIdIs(Long userId, Pageable pageable);
 
-    List<Event> findByInitiator_IdIn(@Param("ids") List<Long> ids);
+    List<Event> findByInitiatorIdIn(@Param("ids") List<Long> ids);
 
     List<Event> findByIdIn(@Param("ids") List<Long> ids);
 }

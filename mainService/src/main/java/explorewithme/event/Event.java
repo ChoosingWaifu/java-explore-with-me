@@ -30,7 +30,7 @@ public class Event {
     private String annotation;
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category")
     private Category category;
     @Column(name = "confirmed_requests")
     private Long confirmedRequests;
@@ -46,7 +46,7 @@ public class Event {
     private LocalDateTime eventDate;
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "initiator_id")
+    @JoinColumn(name = "initiator")
     private User initiator;
     @NotNull
     private Float lat;

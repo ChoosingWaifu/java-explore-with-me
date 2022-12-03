@@ -8,10 +8,11 @@ import explorewithme.category.dto.NewCategoryDto;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.DbConflictException;
 import explorewithme.exceptions.InsufficientRightsException;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.CategoryNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -23,6 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional
     public CategoryDto addCategory(NewCategoryDto dto) {
         checkForUnique(dto.getName());
         Category category = CategoryMapper.toCategory(dto);
@@ -31,20 +33,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto patchCategory(CategoryDto dto) {
         checkForUnique(dto.getName());
         repository.findById(dto.getId())
-                .orElseThrow(() -> new NotFoundException("category not found"));
+                .orElseThrow(CategoryNotFoundException::new);
         Category category = CategoryMapper.toCategory(dto);
         log.info("patch cat {}", dto);
         return CategoryMapper.toCategoryDto(repository.save(category));
     }
 
     @Override
+    @Transactional
     public void deleteCategory(Long catId) {
         repository.findById(catId)
-                .orElseThrow(() -> new NotFoundException("category not found"));
-        if (!eventRepository.findByCategory_IdIs(catId).isEmpty()) {
+                .orElseThrow(CategoryNotFoundException::new);
+        if (!eventRepository.findByCategoryIdIs(catId).isEmpty()) {
             throw new InsufficientRightsException("can't delete category with events");
         }
         log.info("delete cat {}", catId);

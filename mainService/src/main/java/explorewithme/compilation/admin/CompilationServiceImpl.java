@@ -7,10 +7,12 @@ import explorewithme.compilation.dto.CompilationMapper;
 import explorewithme.compilation.dto.NewCompilationDto;
 import explorewithme.event.Event;
 import explorewithme.event.repository.EventRepository;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.CompilationNotFoundException;
+import explorewithme.exceptions.notfound.EventNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +28,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional
     public CompilationDto addCompilation(NewCompilationDto dto) {
         List<Event> events = eventRepository.findByIdIn(dto.getEvents());
         Compilation compilation = CompilationMapper.toCompilation(dto);
@@ -34,6 +37,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void deleteCompilation(Long compId) {
         repository.deleteById(compId);
     }
@@ -41,9 +45,9 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void addEvent(Long compId, Long eventId) {
         Compilation compilation = repository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("compilation not found"));
+                .orElseThrow(CompilationNotFoundException::new);
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         Set<Event> events = compilation.getEvents();
         log.info("before {}", events.size());
         events.add(event);
@@ -52,16 +56,16 @@ public class CompilationServiceImpl implements CompilationService {
         log.info("comp get {}", compilation.getEvents().size());
         repository.save(compilation);
         Set<Event>  check = repository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("compilation not found")).getEvents();
+                .orElseThrow(EventNotFoundException::new).getEvents();
         log.info("check {}, {}", check.size(), check);
     }
 
     @Override
     public void deleteEvent(Long compId, Long eventId) {
         Compilation compilation = repository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("compilation not found"));
+                .orElseThrow(CompilationNotFoundException::new);
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         Set<Event> events = compilation.getEvents();
         events.remove(event);
         compilation.setEvents(events);
@@ -71,7 +75,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void pinCompilation(Long compId) {
         Compilation compilation = repository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("compilation not found"));
+                .orElseThrow(CompilationNotFoundException::new);
         compilation.setPinned(true);
         repository.save(compilation);
     }
@@ -79,7 +83,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void unpinCompilation(Long compId) {
         Compilation compilation = repository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("compilation not found"));
+                .orElseThrow(CompilationNotFoundException::new);
         compilation.setPinned(false);
         repository.save(compilation);
     }

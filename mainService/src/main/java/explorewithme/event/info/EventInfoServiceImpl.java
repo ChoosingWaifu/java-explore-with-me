@@ -6,7 +6,7 @@ import explorewithme.event.dto.EventMapper;
 import explorewithme.event.dto.EventShortDto;
 import explorewithme.event.interaction.EventClient;
 import explorewithme.event.repository.EventRepository;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.EventNotFoundException;
 import explorewithme.request.RequestRepository;
 import explorewithme.request.dto.RequestStatus;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +56,7 @@ public class EventInfoServiceImpl implements EventInfoService {
     @Override
     public EventFullDto getById(Long eventId) {
         Event event = repository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         log.info("info, get event by id  {}", eventId);
         EventFullDto result = EventMapper.toEventFullDto(event);
         Long requests = requestRepository.countByEventIsAndStatusIs(eventId, RequestStatus.CONFIRMED);

@@ -4,7 +4,7 @@ import explorewithme.category.Category;
 import explorewithme.category.CategoryRepository;
 import explorewithme.category.dto.CategoryDto;
 import explorewithme.category.dto.CategoryMapper;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.CategoryNotFoundException;
 import explorewithme.pagination.PageFromRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +35,6 @@ public class CategoryInfoServiceImpl implements CategoryInfoService {
     public CategoryDto getCategoryById(Long categoryId) {
         log.info("info, get by id {}", categoryId);
         return CategoryMapper.toCategoryDto(repository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("category not found")));
+                .orElseThrow(CategoryNotFoundException::new));
     }
 }

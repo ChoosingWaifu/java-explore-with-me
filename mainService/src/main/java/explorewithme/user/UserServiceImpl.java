@@ -1,7 +1,7 @@
 package explorewithme.user;
 
 import explorewithme.exceptions.DbConflictException;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.UserNotFoundException;
 import explorewithme.pagination.PageFromRequest;
 import explorewithme.user.dto.NewUserRequest;
 import explorewithme.user.dto.UserDto;
@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
         if (ids != null) {
             return UserMapper.toUserDtoList(repository.findByIdIn(ids));
@@ -41,11 +43,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getById(Long userId) {
         User user = repository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user not found"));
+                .orElseThrow(UserNotFoundException::new);
         return UserMapper.toUserDto(user);
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         repository.deleteById(userId);
     }

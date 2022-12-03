@@ -5,7 +5,7 @@ import explorewithme.dto.Mapper;
 import explorewithme.dto.NewHit;
 import explorewithme.dto.ViewStats;
 import explorewithme.model.Hit;
-import explorewithme.repository.StatsRepository;
+import explorewithme.repository.HitRepository;
 import explorewithme.utility.DateTimeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
 
-    private final StatsRepository repository;
+    private final HitRepository repository;
 
     @Override
     public HitDto addHit(NewHit newHit) {
@@ -47,21 +47,14 @@ public class StatsServiceImpl implements StatsService {
         if (uris.size() != 0) {
             if (unique) {
                 result = repository.getWithUrisUnique(startTime, endTime, uris);
-                log.info("u nn");
             } else {
-                log.info("params enter {}, {}, {}", uris, startTime, endTime);
                 result = repository.getWithUris(startTime, endTime, uris);
-                log.info("stats s {}", repository.getHitsWithUris("/events/84", startTime, endTime));
-                log.info("nn");
-                log.info("result {}", result);
             }
         } else {
             if (unique) {
                 result = repository.getWithoutUrisUnique(startTime, endTime);
-                log.info("u n");
             } else {
                 result = repository.getWithoutUris(startTime, endTime);
-                log.info("n");
             }
         }
         log.info("result {}", result);

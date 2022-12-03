@@ -3,13 +3,14 @@ package explorewithme.request;
 import explorewithme.event.Event;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.InsufficientRightsException;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.EventNotFoundException;
 import explorewithme.request.dto.ParticipationRequestDto;
 import explorewithme.request.dto.RequestMapper;
 import explorewithme.request.dto.RequestStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +27,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         if (userId.equals(event.getInitiator().getId())) {
             throw new InsufficientRightsException("can't request for own event");
         }
@@ -42,6 +43,7 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequests(Long userId) {
         log.info("request service, get requests for user {}", userId);
         return RequestMapper.toRequestDtoList(repository.findByRequesterIs(userId));

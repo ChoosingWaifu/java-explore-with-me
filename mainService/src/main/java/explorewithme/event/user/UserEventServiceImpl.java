@@ -7,7 +7,7 @@ import explorewithme.event.interaction.EventClient;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.event.dto.*;
 import explorewithme.exceptions.InsufficientRightsException;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.*;
 import explorewithme.pagination.PageFromRequest;
 import explorewithme.request.ParticipationRequest;
 import explorewithme.request.RequestRepository;
@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,10 +41,11 @@ public class UserEventServiceImpl implements UserEventService {
     private final EventClient client;
 
     @Override
+    @Transactional(readOnly = true)
     public List<EventShortDto> getEvents(Long userId, Integer from, Integer size) {
         Pageable pageable = PageFromRequest.of(from, size);
         log.info("private service, get events {}, {}, {}", userId, size, from);
-        List<EventShortDto> result = EventMapper.toListEventShortDto(repository.findByInitiator_IdIs(userId, pageable));
+        List<EventShortDto> result = EventMapper.toListEventShortDto(repository.findByInitiatorIdIs(userId, pageable));
         for (EventShortDto event: result) {
             event.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(event.getId(), RequestStatus.CONFIRMED));
         }
@@ -57,19 +59,20 @@ public class UserEventServiceImpl implements UserEventService {
             throw new InsufficientRightsException("invalid date, need at least 2h before event date");
         }
         Category category = categoryRepository.findById(dto.getCategory())
-                .orElseThrow(() -> new NotFoundException("category not found"));
+                .orElseThrow(CategoryNotFoundException::new);
         event.setCategory(category);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("user not found"));
+                .orElseThrow(UserNotFoundException::new);
         event.setInitiator(user);
         log.info("private service, add event {}", event);
         return EventMapper.toEventFullDto(repository.save(event));
     }
 
     @Override
+    @Transactional
     public EventFullDto updateEvent(Long userId, UpdateEventRequest updateRequest) {
         Event event = repository.findById(updateRequest.getEventId())
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         if (!event.getInitiator().getId().equals(userId)) {
             throw new InsufficientRightsException("can't patch other's events");
         }
@@ -85,7 +88,7 @@ public class UserEventServiceImpl implements UserEventService {
         }
         Long categoryId = updateRequest.getCategory() == null ? event.getCategory().getId() : updateRequest.getCategory();
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("category not found"));
+                .orElseThrow(CategoryNotFoundException::new);
         result.setCategory(category);
         log.info("private service, update event with {}", updateRequest);
         return EventMapper.toEventFullDto(repository.save(result));
@@ -94,7 +97,7 @@ public class UserEventServiceImpl implements UserEventService {
     @Override
     public EventFullDto getById(Long userId, Long eventId) {
         Event event = repository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         log.info("private service, get by id {}", eventId);
         EventFullDto result = EventMapper.toEventFullDto(event);
         result.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(eventId, RequestStatus.CONFIRMED));
@@ -105,7 +108,7 @@ public class UserEventServiceImpl implements UserEventService {
     @Override
     public EventFullDto cancelEvent(Long userId, Long eventId) {
         Event event = repository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         if (!event.getInitiator().getId().equals(userId)) {
             throw new InsufficientRightsException("can't cancel other's events");
         }
@@ -119,6 +122,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequests(Long userId, Long eventId) {
         List<ParticipationRequest> requests = requestRepository.findByEventIs(eventId);
         log.info("private service, get requests {}", eventId);
@@ -128,9 +132,9 @@ public class UserEventServiceImpl implements UserEventService {
     @Override
     public ParticipationRequestDto confirmRequest(Long userId, Long eventId, Long requestId) {
         Event event = repository.findById(eventId)
-                .orElseThrow(() -> new NotFoundException("event not found"));
+                .orElseThrow(EventNotFoundException::new);
         ParticipationRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("request not found"));
+                .orElseThrow(RequestNotFoundException::new);
         request.setStatus(RequestStatus.CONFIRMED);
         if (event.getParticipantLimit() <= requestRepository.findByEventIs(eventId).size()) {
             throw new InsufficientRightsException("too many requests to confirm");
@@ -143,7 +147,7 @@ public class UserEventServiceImpl implements UserEventService {
     @Override
     public ParticipationRequestDto rejectRequest(Long userId, Long eventId, Long requestId) {
         ParticipationRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException("request not found"));
+                .orElseThrow(RequestNotFoundException::new);
         request.setStatus(RequestStatus.REJECTED);
         requestRepository.save(request);
         log.info("private service, reject request {}", requestId);

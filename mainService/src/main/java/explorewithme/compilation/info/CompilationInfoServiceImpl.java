@@ -4,7 +4,7 @@ import explorewithme.compilation.Compilation;
 import explorewithme.compilation.CompilationRepository;
 import explorewithme.compilation.dto.CompilationDto;
 import explorewithme.compilation.dto.CompilationMapper;
-import explorewithme.exceptions.NotFoundException;
+import explorewithme.exceptions.notfound.CompilationNotFoundException;
 import explorewithme.pagination.PageFromRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +34,6 @@ public class CompilationInfoServiceImpl implements CompilationInfoService {
     @Override
     public CompilationDto getCompilationById(Long compId) {
         return CompilationMapper.toCompilationDto(repository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("compilation not found")));
+                .orElseThrow(CompilationNotFoundException::new));
     }
 }
