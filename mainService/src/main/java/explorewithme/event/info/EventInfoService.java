@@ -17,4 +17,11 @@ public interface EventInfoService {
                                   Integer size, Integer from);
 
     EventFullDto getById(Long eventId);
+
+    void likeEvent(Long liker, Long liked, Boolean type);
+
+    void removeLike(Long liker, Long liked);
+
+    List<EventFullDto> getTopEvents();
+
 }

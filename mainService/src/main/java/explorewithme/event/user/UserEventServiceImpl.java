@@ -15,7 +15,7 @@ import explorewithme.request.dto.ParticipationRequestDto;
 import explorewithme.request.dto.RequestMapper;
 import explorewithme.request.dto.RequestStatus;
 import explorewithme.user.User;
-import explorewithme.user.UserRepository;
+import explorewithme.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;

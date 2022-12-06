@@ -2,6 +2,7 @@ package explorewithme.event;
 
 import explorewithme.category.Category;
 import explorewithme.event.dto.EventState;
+import explorewithme.likes.Like;
 import explorewithme.user.User;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -11,6 +12,8 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -65,6 +68,15 @@ public class Event {
     @Min(3)
     @Max(120)
     private String title;
+    @NotNull
+    private Boolean ratingVisibility;
+
+    @OneToMany(cascade = { CascadeType.ALL })
+    @JoinTable(name = "events_likes",
+               joinColumns = { @JoinColumn(name = "event_id") },
+               inverseJoinColumns = { @JoinColumn(name = "like_id") }
+    )
+    private Set<Like> likes = new HashSet<>();
 
 }
 

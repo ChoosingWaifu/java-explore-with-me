@@ -51,4 +51,28 @@ public class EventInfoController {
         return service.getById(id);
     }
 
+    @GetMapping("/top")
+    public List<EventFullDto> getTopEvents(HttpServletRequest servletRequest) {
+        log.info("public, get top events");
+        String uri = servletRequest.getRequestURI();
+        String ip = servletRequest.getRemoteAddr();
+        client.sendHitToStats(new NewHit(appName, uri, ip));
+        return service.getTopEvents();
+    }
+
+    @PatchMapping("/{id}")
+    public void likeEvent(@RequestHeader("X-Explorer-User-Id") Long liker,
+                          @PathVariable Long id,
+                          @RequestParam Boolean type) {
+        log.info("controller users, user {} liked {}", liker, id);
+        service.likeEvent(liker, id, type);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removeLike(@RequestHeader("X-Explorer-User-Id") Long liker,
+                           @PathVariable Long id) {
+        log.info("controller users, user {} removed like from {}", liker, id);
+        service.removeLike(liker, id);
+    }
+
 }

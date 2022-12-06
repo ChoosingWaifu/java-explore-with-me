@@ -28,4 +28,6 @@ public class EventFullDto {
     private EventState state;
     private String title;
     private Long views;
+    private Boolean ratingVisibility;
+    private Long rating;
 }

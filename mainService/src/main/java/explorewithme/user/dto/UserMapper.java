@@ -7,6 +7,15 @@ import java.util.List;
 
 public class UserMapper {
 
+    public static UserInfoDto toUserInfoDto(User user) {
+        return new UserInfoDto(
+                user.getName(),
+                user.getEmail(),
+               null,
+               null
+        );
+    }
+
     public static UserShortDto toUserShortDto(User user) {
         return new UserShortDto(
                 user.getName(),
@@ -18,7 +27,8 @@ public class UserMapper {
         return new User(
                 null,
                 userRequest.getName(),
-                userRequest.getEmail()
+                userRequest.getEmail(),
+                null
         );
     }
 
@@ -26,7 +36,8 @@ public class UserMapper {
         return new User(
                 userDto.getId(),
                 userDto.getName(),
-                userDto.getEmail()
+                userDto.getEmail(),
+                null
         );
     }
 
