@@ -16,6 +16,7 @@ import explorewithme.user.dto.UserMapper;
 import explorewithme.user.repository.UserRepository;
 import explorewithme.utility.Rating;
 import explorewithme.utility.RatingMapper;
+import explorewithme.utility.interaction.ClientImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,8 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     private final RequestRepository requestRepository;
 
+    private final ClientImpl client;
+
     @Override
     public UserInfoDto getUserInfo(Long userId) {
         User user = userRepository.findById(userId)
@@ -47,20 +50,24 @@ public class UserInfoServiceImpl implements UserInfoService {
 
         Long rating = LikeMapper.getRating(user.getLikes());
         result.setRating(rating);
+        Long views = client.addViewsUser(userId);
+        result.setViews(views);
         return result;
     }
 
     @Override
-    public List<UserInfoDto> getTopUsers(Integer from, Integer size) {
+    public List<UserInfoDto> getTopUsers() {
+        log.info("service, get top Users");
         List<Object[]> topUsers = userRepository.topUsers();
         List<Rating> ratings = RatingMapper.mapRating(topUsers);
-        log.info("top Users {}", topUsers);
+        log.info("top Users size {}", topUsers.size());
         log.info("ratings {}", ratings);
         return toUserInfoList(ratings);
     }
 
     @Override
     public void likeUser(Long liker, Long liked, Boolean type) {
+        log.info("service, like from user {} to user {}, type {}", liker, liked, type);
         User userLiker = userRepository.findById(liker)
                 .orElseThrow(UserNotFoundException::new);
         User userLiked = userRepository.findById(liked)
@@ -69,8 +76,10 @@ public class UserInfoServiceImpl implements UserInfoService {
         Optional<Like> findLike = likes.stream().filter(o -> o.getLiker().getId().equals(liker)).findFirst();
         if (findLike.isPresent()) {
             if (findLike.get().getType().equals(type)) {
+                log.info("like with the same type exists");
                 throw new InsufficientRightsException("like already exists");
             } else  {
+                log.info("like with another type exists");
                 Like newTypeLike = findLike.get();
                 newTypeLike.setType(type);
                 likes.remove(findLike.get());
@@ -87,7 +96,7 @@ public class UserInfoServiceImpl implements UserInfoService {
             List<Long> eventsIds = events.stream().map(Event::getId).collect(Collectors.toList());
             Boolean checkLike = requestRepository.existsByEventInAndRequesterIsAndStatusIs(eventsIds, liker, RequestStatus.CONFIRMED);
             log.info("check like {}", checkLike);
-            /* if (!checkLike) {
+            /*if (!checkLike) {
                 throw new InsufficientRightsException("can't like/dislike user without users event participations");
             }*/
             log.info("check like not thrown");
@@ -105,6 +114,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 
     @Override
     public void removeLike(Long liker, Long liked) {
+        log.info("service, remove like from user {} to user {}", liker, liked);
         userRepository.findById(liker)
                 .orElseThrow(UserNotFoundException::new);
         User userLiked = userRepository.findById(liked)
@@ -121,6 +131,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     private List<UserInfoDto> toUserInfoList(List<Rating> uRatings) {
         List<Long> ids = uRatings.stream().map(Rating::getId).collect(Collectors.toList());
         List<User> users = userRepository.findByIdIn(ids);
+        client.addViewsUserList(users);
         List<UserInfoDto> result = new ArrayList<>();
         for (User user: users) {
             for (Rating rating: uRatings) {
@@ -129,7 +140,8 @@ public class UserInfoServiceImpl implements UserInfoService {
                     result.add(new UserInfoDto(user.getName(),
                                                user.getEmail(),
                                                rating.getRating(),
-                                               new HashSet<>(events)));
+                                               new HashSet<>(events),
+                                               user.getViews()));
                 }
             }
         }

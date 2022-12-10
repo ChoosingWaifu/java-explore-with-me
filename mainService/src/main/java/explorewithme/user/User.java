@@ -33,4 +33,6 @@ public class User {
     )
     private Set<Like> likes = new HashSet<>();
 
+    @Transient
+    private Long views;
 }

@@ -12,7 +12,8 @@ public class UserMapper {
                 user.getName(),
                 user.getEmail(),
                null,
-               null
+               null,
+                null
         );
     }
 
@@ -28,6 +29,7 @@ public class UserMapper {
                 null,
                 userRequest.getName(),
                 userRequest.getEmail(),
+                null,
                 null
         );
     }
@@ -37,6 +39,7 @@ public class UserMapper {
                 userDto.getId(),
                 userDto.getName(),
                 userDto.getEmail(),
+                null,
                 null
         );
     }

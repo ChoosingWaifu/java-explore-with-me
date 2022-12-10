@@ -34,7 +34,8 @@ public class CustomEventRepositoryImpl implements CustomEventRepository {
                 " FROM (events_likes ul" +
                 " JOIN likes l on l.id = ul.like_id) joined" +
                 " GROUP BY event_id" +
-                " ORDER BY event_id) as likes_dislikes_query";
+                " ORDER BY event_id) as likes_dislikes_query" +
+                " LIMIT 100";
         Query q = em.createNativeQuery(query);
         List<Object[]> objectList = (List<Object[]>) q.getResultList();
         log.info("result {}", objectList);
@@ -91,7 +92,7 @@ public class CustomEventRepositoryImpl implements CustomEventRepository {
         Predicate[] predicatesArray = predicates.toArray(new Predicate[0]);
         CriteriaQuery<Event> resultQ = cq.where(predicatesArray);
         List<Event> resultList = em.createQuery(resultQ).setFirstResult(from).setMaxResults(size).getResultList();
-        log.info("list event {}, {}", resultList, resultList.size());
+        log.info("list event {}", resultList.size());
         return resultList;
     }
 
@@ -107,13 +108,9 @@ public class CustomEventRepositoryImpl implements CustomEventRepository {
             List<EventState> eventStates = states.stream().map(EventState::fromStr).collect(Collectors.toList());
             predicates.add(eventRoot.get("state").in(eventStates));
         }
-        List<Event> firstPredicate = em.createQuery(cq.where(predicates.toArray(new Predicate[0]))).getResultList();
-        log.info("1, states {}", firstPredicate);
         if (categories != null) {
             predicates.add(eventRoot.get("category").in(categories));
         }
-        List<Event> secondPredicate = em.createQuery(cq.where(predicates.toArray(new Predicate[0]))).getResultList();
-        log.info("2, category {}", secondPredicate.size());
         if (rangeStart != null && rangeEnd != null) {
             predicates.add(cb.between(eventRoot.get("eventDate"),
                     rangeStart, rangeEnd));
@@ -126,8 +123,6 @@ public class CustomEventRepositoryImpl implements CustomEventRepository {
             predicates.add(cb.between(eventRoot.get("eventDate"),
                     LocalDateTime.now(), LocalDateTime.MAX));
         }*/
-        List<Event> thirdPredicate = em.createQuery(cq.where(predicates.toArray(new Predicate[0]))).getResultList();
-        log.info("3, event date {}", thirdPredicate.size());
         Predicate[] predicatesArray = predicates.toArray(new Predicate[0]);
         CriteriaQuery<Event> resultQ = cq.where(predicatesArray);
         return em.createQuery(resultQ).setFirstResult(from).setMaxResults(size).getResultList();

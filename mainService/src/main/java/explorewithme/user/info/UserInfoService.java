@@ -8,7 +8,7 @@ public interface UserInfoService {
 
     UserInfoDto getUserInfo(Long userId);
 
-    List<UserInfoDto> getTopUsers(Integer from, Integer size);
+    List<UserInfoDto> getTopUsers();
 
     void likeUser(Long liker, Long liked, Boolean type);
 

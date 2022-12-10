@@ -1,4 +1,4 @@
-package explorewithme.event.interaction;
+package explorewithme.utility.interaction;
 
 import lombok.*;
 
@@ -7,12 +7,12 @@ import lombok.*;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ViewStats {
+public class NewHit {
 
     private String app;
 
     private String uri;
 
-    private Long hits;
+    private String ip;
 
 }

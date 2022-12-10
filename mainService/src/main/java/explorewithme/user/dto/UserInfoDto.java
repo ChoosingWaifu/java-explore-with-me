@@ -19,4 +19,6 @@ public class UserInfoDto {
     private Long rating;
 
     private Set<Event> events;
+
+    private Long views;
 }

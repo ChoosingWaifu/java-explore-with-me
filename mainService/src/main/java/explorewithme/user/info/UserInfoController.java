@@ -1,7 +1,7 @@
 package explorewithme.user.info;
 
-import explorewithme.event.interaction.EventClient;
-import explorewithme.event.interaction.NewHit;
+import explorewithme.utility.interaction.ClientImpl;
+import explorewithme.utility.interaction.NewHit;
 import explorewithme.user.dto.UserInfoDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserInfoController {
 
-    private final EventClient client;
+    private final ClientImpl client;
 
     private final UserInfoService service;
 
@@ -25,14 +25,12 @@ public class UserInfoController {
     private String appName;
 
     @GetMapping
-    public List<UserInfoDto> topUsers(HttpServletRequest httpRequest,
-                                      Integer from,
-                                      Integer size) {
-        log.info("controller, get top users {}, {}", from, size);
+    public List<UserInfoDto> topUsers(HttpServletRequest httpRequest) {
+        log.info("controller, get top users");
         String uri = httpRequest.getRequestURI();
         String ip = httpRequest.getRemoteAddr();
         client.sendHitToStats(new NewHit(appName, uri, ip));
-        return service.getTopUsers(from, size);
+        return service.getTopUsers();
     }
 
     @GetMapping("/{userId}")

@@ -4,7 +4,7 @@ import explorewithme.event.Event;
 import explorewithme.event.dto.EventFullDto;
 import explorewithme.event.dto.EventMapper;
 import explorewithme.event.dto.EventShortDto;
-import explorewithme.event.interaction.EventClient;
+import explorewithme.utility.interaction.ClientImpl;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.InsufficientRightsException;
 import explorewithme.exceptions.notfound.EventNotFoundException;
@@ -39,7 +39,7 @@ public class EventInfoServiceImpl implements EventInfoService {
 
     private final LikeRepository likeRepository;
 
-    private final EventClient client;
+    private final ClientImpl client;
 
     @Override
     public List<EventShortDto> getEvents(String text,
@@ -56,7 +56,7 @@ public class EventInfoServiceImpl implements EventInfoService {
         for (EventShortDto event: result) {
             event.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(event.getId(), RequestStatus.CONFIRMED));
         }
-        result = client.addViewsList(result);
+        result = client.addViewsEventList(result);
         if (sort != null) {
             result = result.stream()
                     .sorted(Comparator.comparing(EventShortDto::getViews)
@@ -74,9 +74,11 @@ public class EventInfoServiceImpl implements EventInfoService {
         Long requests = requestRepository.countByEventIsAndStatusIs(eventId, RequestStatus.CONFIRMED);
         log.info("requests {}", requests);
         result.setConfirmedRequests(requests);
-        result.setViews(client.addViews(event));
-        Long rating = LikeMapper.getRating(event.getLikes());
-        result.setRating(rating);
+        result.setViews(client.addViewsEvent(event));
+        if (event.getRatingVisibility()) {
+            Long rating = LikeMapper.getRating(event.getLikes());
+            result.setRating(rating);
+        }
         return result;
     }
 
@@ -93,6 +95,7 @@ public class EventInfoServiceImpl implements EventInfoService {
 
     @Override
     public void likeEvent(Long liker, Long liked, Boolean type) {
+        log.info("service, like from user {} to event {}, type {}", liker, liked, type);
         User userLiker = userRepository.findById(liker)
                 .orElseThrow(UserNotFoundException::new);
         Event eventLiked = repository.findById(liked)
@@ -128,6 +131,7 @@ public class EventInfoServiceImpl implements EventInfoService {
 
     @Override
     public void removeLike(Long liker, Long liked) {
+        log.info("service, remove like from user {} to event {}", liker, liked);
         userRepository.findById(liker)
                 .orElseThrow(UserNotFoundException::new);
         Event eventLiked = repository.findById(liked)

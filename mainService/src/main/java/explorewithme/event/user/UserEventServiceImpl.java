@@ -3,7 +3,7 @@ package explorewithme.event.user;
 import explorewithme.category.Category;
 import explorewithme.category.CategoryRepository;
 import explorewithme.event.Event;
-import explorewithme.event.interaction.EventClient;
+import explorewithme.utility.interaction.ClientImpl;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.event.dto.*;
 import explorewithme.exceptions.InsufficientRightsException;
@@ -38,7 +38,7 @@ public class UserEventServiceImpl implements UserEventService {
 
     private final RequestRepository requestRepository;
 
-    private final EventClient client;
+    private final ClientImpl client;
 
     @Override
     @Transactional(readOnly = true)
@@ -101,7 +101,7 @@ public class UserEventServiceImpl implements UserEventService {
         log.info("private service, get by id {}", eventId);
         EventFullDto result = EventMapper.toEventFullDto(event);
         result.setConfirmedRequests(requestRepository.countByEventIsAndStatusIs(eventId, RequestStatus.CONFIRMED));
-        result.setViews(client.addViews(event));
+        result.setViews(client.addViewsEvent(event));
         return result;
     }
 
@@ -153,4 +153,18 @@ public class UserEventServiceImpl implements UserEventService {
         log.info("private service, reject request {}", requestId);
         return RequestMapper.toRequestDto(request);
     }
+
+    @Override
+    public Boolean changeRatingVisibility(Long userId, Long eventId) {
+        log.info("service, change rate visible");
+        Event event = repository.findById(eventId)
+                .orElseThrow(EventNotFoundException::new);
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new InsufficientRightsException("can't patch other's events");
+        }
+        event.setRatingVisibility(!event.getRatingVisibility());
+        repository.save(event);
+        return event.getRatingVisibility();
+    }
+
 }

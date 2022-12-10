@@ -24,10 +24,9 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                         " FROM (users_likes ul" +
                         " JOIN likes l on l.id = ul.like_id) joined" +
                         " GROUP BY user_id" +
-                        " ORDER BY user_id) as likes_dislikes_query";
+                        " ORDER BY user_id) as likes_dislikes_query" +
+                        " LIMIT 100";
         Query q = em.createNativeQuery(query);
-        List<Object[]> objectList = (List<Object[]>) q.getResultList();
-        log.info("result {}", objectList);
-        return objectList;
+        return (List<Object[]>) q.getResultList();
     }
 }
