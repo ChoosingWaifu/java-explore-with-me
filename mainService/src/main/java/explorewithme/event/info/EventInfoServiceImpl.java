@@ -140,6 +140,7 @@ public class EventInfoServiceImpl implements EventInfoService {
         Set<Like> likes = eventLiked.getLikes();
         Optional<Like> like = likes.stream().filter(o -> o.getLiker().getId().equals(liker)).findFirst();
         like.ifPresent(likes::remove);
+        like.ifPresent(likeRepository::delete);
         repository.save(eventLiked);
     }
 

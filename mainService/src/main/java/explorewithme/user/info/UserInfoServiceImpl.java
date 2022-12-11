@@ -124,6 +124,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         Optional<Like> like = likes.stream().filter(o -> o.getLiker().getId().equals(liker)).findFirst();
         log.info("likes size {}", likes.size());
         like.ifPresent(likes::remove);
+        like.ifPresent(likeRepository::delete);
         log.info("likes size {}", likes.size());
         userRepository.save(userLiked);
     }
