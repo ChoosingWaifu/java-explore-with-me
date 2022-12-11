@@ -6,6 +6,7 @@ import explorewithme.pagination.PageFromRequest;
 import explorewithme.user.dto.NewUserRequest;
 import explorewithme.user.dto.UserDto;
 import explorewithme.user.dto.UserMapper;
+import explorewithme.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;

@@ -36,7 +36,9 @@ public class EventMapper {
                 event.getRequestModeration(),
                 event.getState(),
                 event.getTitle(),
-                views
+                views,
+                event.getRatingVisibility(),
+                null
         );
     }
 
@@ -90,7 +92,9 @@ public class EventMapper {
                 null,
                 requestModeration,
                 EventState.PENDING,
-                dto.getTitle()
+                dto.getTitle(),
+                true,
+                null
         );
     }
 
@@ -117,7 +121,9 @@ public class EventMapper {
                 event.getPublishedOn(),
                 event.getRequestModeration(),
                 event.getState(),
-                title
+                title,
+                event.getRatingVisibility(),
+                event.getLikes()
         );
     }
 
@@ -154,7 +160,9 @@ public class EventMapper {
                 event.getPublishedOn(),
                 requestModeration,
                 event.getState(),
-                title
+                title,
+                event.getRatingVisibility(),
+                event.getLikes()
         );
     }
 

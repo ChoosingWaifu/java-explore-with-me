@@ -26,4 +26,6 @@ public interface UserEventService {
 
     ParticipationRequestDto rejectRequest(Long userId, Long eventId, Long requestId);
 
+    Boolean changeRatingVisibility(Long userId, Long eventId);
+
 }

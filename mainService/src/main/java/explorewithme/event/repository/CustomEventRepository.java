@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface CustomEventRepository {
 
+    List<Object[]> topEvents();
+
     List<Event> infoFindEventsBy(String text,
                                  List<Long> categories,
                                  Boolean paid,

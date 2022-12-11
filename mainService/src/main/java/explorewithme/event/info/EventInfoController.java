@@ -2,8 +2,8 @@ package explorewithme.event.info;
 
 import explorewithme.event.dto.EventFullDto;
 import explorewithme.event.dto.EventShortDto;
-import explorewithme.event.interaction.EventClient;
-import explorewithme.event.interaction.NewHit;
+import explorewithme.utility.interaction.ClientImpl;
+import explorewithme.utility.interaction.NewHit;
 import explorewithme.utility.DateTimeMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class EventInfoController {
 
     private final EventInfoService service;
 
-    private final EventClient client;
+    private final ClientImpl client;
 
     @Value("${app.name}")
     private String appName;
@@ -49,6 +49,30 @@ public class EventInfoController {
         String ip = servletRequest.getRemoteAddr();
         client.sendHitToStats(new NewHit(appName, uri, ip));
         return service.getById(id);
+    }
+
+    @GetMapping("/top")
+    public List<EventFullDto> getTopEvents(HttpServletRequest servletRequest) {
+        log.info("public, get top events");
+        String uri = servletRequest.getRequestURI();
+        String ip = servletRequest.getRemoteAddr();
+        client.sendHitToStats(new NewHit(appName, uri, ip));
+        return service.getTopEvents();
+    }
+
+    @PatchMapping("/{id}")
+    public void likeEvent(@RequestHeader("X-Explorer-User-Id") Long liker,
+                          @PathVariable Long id,
+                          @RequestParam Boolean type) {
+        log.info("controller events, user {} liked {}", liker, id);
+        service.likeEvent(liker, id, type);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removeLike(@RequestHeader("X-Explorer-User-Id") Long liker,
+                           @PathVariable Long id) {
+        log.info("controller events, user {} removed like from {}", liker, id);
+        service.removeLike(liker, id);
     }
 
 }

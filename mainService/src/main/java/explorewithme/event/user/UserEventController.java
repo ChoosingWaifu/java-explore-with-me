@@ -56,6 +56,13 @@ public class UserEventController {
         return service.cancelEvent(userId, eventId);
     }
 
+    @PatchMapping("/{eventId}/visible")
+    public Boolean changeRatingVisibility(@PathVariable Long userId,
+                                    @PathVariable Long eventId) {
+        log.info("private, change rate visible event {}, userId {}", eventId, userId);
+        return service.changeRatingVisibility(userId, eventId);
+    }
+
     @GetMapping("/{eventId}/requests")
     public List<ParticipationRequestDto> getRequests(@PathVariable Long userId,
                                                      @PathVariable Long eventId) {

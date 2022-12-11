@@ -29,8 +29,7 @@ public class StatsController {
     public ResponseEntity<Object> getStats(@RequestParam String start,
                                            @RequestParam String end,
                                            @RequestParam(required = false) List<String> uris,
-                                           @RequestParam(defaultValue = "false") Boolean unique
-                                          ) {
+                                           @RequestParam(defaultValue = "false") Boolean unique) {
         log.info("controller, get stats {}, {}, {}, {}", uris, unique, start, end);
         List<ViewStats> viewStatsList = service.getStats(uris, unique, start, end);
         return new ResponseEntity<>(viewStatsList, HttpStatus.OK);

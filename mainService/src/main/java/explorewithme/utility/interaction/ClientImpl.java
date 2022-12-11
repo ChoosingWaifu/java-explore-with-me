@@ -1,7 +1,8 @@
-package explorewithme.event.interaction;
+package explorewithme.utility.interaction;
 
 import explorewithme.event.Event;
 import explorewithme.event.dto.EventShortDto;
+import explorewithme.user.User;
 import explorewithme.utility.BaseClient;
 import explorewithme.utility.DateTimeMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +21,10 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class EventClient extends BaseClient {
+public class ClientImpl extends BaseClient {
 
     @Autowired
-    public EventClient(@Value("${ewm-stats.url}") String serverUrl, RestTemplateBuilder builder) {
+    public ClientImpl(@Value("${ewm-stats.url}") String serverUrl, RestTemplateBuilder builder) {
         super(builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
                 .requestFactory(HttpComponentsClientHttpRequestFactory::new)
@@ -57,8 +58,18 @@ public class EventClient extends BaseClient {
         return get("/stats" + "?start={start}&end={end}&uris={uris}&unique={unique}", parameters);
     }
 
-    @SuppressWarnings("unchecked")
-    public Long addViews(Event event) {
+    public Long addViewsUser(Long userId) {
+        ResponseEntity<Object> response = getStats(
+                LocalDateTime.now().minusYears(10).format(DateTimeMapper.format()),
+                LocalDateTime.now().plusYears(10).format(DateTimeMapper.format()),
+                "/info/users/" + userId,
+                true);
+        Long result = getViewsForObj(response);
+        log.info("result {}", result);
+        return result;
+    }
+
+    public Long addViewsEvent(Event event) {
         Long eventId = event.getId();
         LocalDateTime start = event.getPublishedOn() == null ? event.getCreatedOn() : event.getPublishedOn();
         String end = LocalDateTime.now().plusYears(10).format(DateTimeMapper.format());
@@ -69,6 +80,49 @@ public class EventClient extends BaseClient {
                 "/events/" + eventId,
                 false);
         log.info("response get body");
+        return getViewsForObj(response);
+    }
+
+    public List<User> addViewsUserList(List<User> users) {
+        StringBuilder uris = new StringBuilder();
+        for (User user : users) {
+            uris.append("/info/users/").append(user.getId()).append(" ");
+        }
+        Map<String, Long> mapUriHits = mapViewsForList(uris);
+        Set<String> urisSet = mapUriHits.keySet();
+        for (User user : users) {
+            String checkUri = "/info/users/" + user.getId();
+            if (urisSet.contains(checkUri)) {
+                user.setViews(mapUriHits.get(checkUri));
+            } else {
+                user.setViews(0L);
+            }
+        }
+        log.info("add views");
+        return users;
+    }
+
+    public List<EventShortDto> addViewsEventList(List<EventShortDto> events) {
+        StringBuilder uris = new StringBuilder();
+        for (EventShortDto event : events) {
+            uris.append("/events/").append(event.getId()).append(" ");
+        }
+        log.info("uris {}", uris);
+        Map<String, Long> mapUriHits = mapViewsForList(uris);
+        Set<String> urisSet = mapUriHits.keySet();
+        for (EventShortDto event : events) {
+            String checkUri = "/events/" + event.getId();
+            if (urisSet.contains(checkUri)) {
+                event.setViews(mapUriHits.get(checkUri));
+            } else {
+                event.setViews(0L);
+            }
+        }
+        log.info("add views");
+        return events;
+    }
+
+    private Long getViewsForObj(ResponseEntity<Object> response) {
         List<LinkedHashMap<Object, Object>> stats;
         if (response.getStatusCode().is2xxSuccessful()) {
             stats = (List<LinkedHashMap<Object, Object>>) response.getBody();
@@ -80,13 +134,7 @@ public class EventClient extends BaseClient {
         return 0L;
     }
 
-    @SuppressWarnings("unchecked")
-    public List<EventShortDto> addViewsList(List<EventShortDto> events) {
-        StringBuilder uris = new StringBuilder();
-        for (EventShortDto event : events) {
-            uris.append("/events/").append(event.getId()).append(" ");
-        }
-        log.info("uris {}", uris);
+    private Map<String, Long> mapViewsForList(StringBuilder uris) {
         ResponseEntity<Object> response = getStats(
                 LocalDateTime.now().minusYears(3).format(DateTimeMapper.format()),
                 LocalDateTime.now().plusYears(3).format(DateTimeMapper.format()),
@@ -102,19 +150,12 @@ public class EventClient extends BaseClient {
                 Long hits = Long.parseLong(String.valueOf(stat.get("hits")));
                 mapUriHits.put(uri, hits);
             }
-            Set<String> urisSet = mapUriHits.keySet();
-            for (EventShortDto event : events) {
-                String checkUri = "/events/" + event.getId();
-                if (urisSet.contains(checkUri)) {
-                    event.setViews(mapUriHits.get(checkUri));
-                } else {
-                    event.setViews(0L);
-                }
-            }
+            return mapUriHits;
         }
-        log.info("add views");
-        return events;
+        throw new RuntimeException("response status code unsuccessful");
     }
+
+
 }
 
 

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
@@ -25,6 +26,21 @@ public class CustomEventRepositoryImpl implements CustomEventRepository {
 
     @PersistenceContext
     private final EntityManager em;
+
+    @Override
+    public List<Object[]> topEvents() {
+        String query = "Select likes_dislikes_query.event_id as id, likes_dislikes_query.lc - likes_dislikes_query.dc as rating" +
+                " from (SELECT event_id, count(joined.event_id) filter (where type) as lc, count(joined.event_id) filter (where not type) as dc" +
+                " FROM (events_likes ul" +
+                " JOIN likes l on l.id = ul.like_id) joined" +
+                " GROUP BY event_id" +
+                " ORDER BY event_id) as likes_dislikes_query" +
+                " LIMIT 100";
+        Query q = em.createNativeQuery(query);
+        List<Object[]> objectList = (List<Object[]>) q.getResultList();
+        log.info("result {}", objectList);
+        return objectList;
+    }
 
     public List<Event> infoFindEventsBy(String text,
                                         List<Long> categories,
@@ -76,14 +92,14 @@ public class CustomEventRepositoryImpl implements CustomEventRepository {
         Predicate[] predicatesArray = predicates.toArray(new Predicate[0]);
         CriteriaQuery<Event> resultQ = cq.where(predicatesArray);
         List<Event> resultList = em.createQuery(resultQ).setFirstResult(from).setMaxResults(size).getResultList();
-        log.info("list event {}, {}", resultList, resultList.size());
+        log.info("list event {}", resultList.size());
         return resultList;
     }
 
     public List<Event> adminFindEventsBy(List<String> states,
-                                           List<Long> categories,
-                                           LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                           Integer size, Integer from) {
+                                         List<Long> categories,
+                                         LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                         Integer size, Integer from) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> cq = cb.createQuery(Event.class);
         Root<Event> eventRoot = cq.from(Event.class);
@@ -92,22 +108,21 @@ public class CustomEventRepositoryImpl implements CustomEventRepository {
             List<EventState> eventStates = states.stream().map(EventState::fromStr).collect(Collectors.toList());
             predicates.add(eventRoot.get("state").in(eventStates));
         }
-        List<Event> firstPredicate = em.createQuery(cq.where(predicates.toArray(new Predicate[0]))).getResultList();
-        log.info("1, states {}", firstPredicate);
         if (categories != null) {
             predicates.add(eventRoot.get("category").in(categories));
         }
-        List<Event> secondPredicate = em.createQuery(cq.where(predicates.toArray(new Predicate[0]))).getResultList();
-        log.info("2, category {}", secondPredicate.size());
         if (rangeStart != null && rangeEnd != null) {
             predicates.add(cb.between(eventRoot.get("eventDate"),
                     rangeStart, rangeEnd));
+        } /*else if (rangeEnd != null) {
+            log.info("range end != null");
+            predicates.add(cb.between(eventRoot.get("eventDate"),
+                    LocalDateTime.MIN, rangeEnd));
         } else {
+            log.info("now to max");
             predicates.add(cb.between(eventRoot.get("eventDate"),
                     LocalDateTime.now(), LocalDateTime.MAX));
-        }
-        List<Event> thirdPredicate = em.createQuery(cq.where(predicates.toArray(new Predicate[0]))).getResultList();
-        log.info("3, event date {}", thirdPredicate.size());
+        }*/
         Predicate[] predicatesArray = predicates.toArray(new Predicate[0]);
         CriteriaQuery<Event> resultQ = cq.where(predicatesArray);
         return em.createQuery(resultQ).setFirstResult(from).setMaxResults(size).getResultList();
