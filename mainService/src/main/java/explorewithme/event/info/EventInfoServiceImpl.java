@@ -90,7 +90,7 @@ public class EventInfoServiceImpl implements EventInfoService {
         log.info("ratings {}", ratings);
         List<EventFullDto> result = toEventDtoWithRating(ratings);
         log.info("result {}", result);
-        return result.stream().sorted(Comparator.comparing(EventFullDto::getRating)).collect(Collectors.toList());
+        return result.stream().sorted(Comparator.comparing(EventFullDto::getRating).reversed()).collect(Collectors.toList());
     }
 
     @Override

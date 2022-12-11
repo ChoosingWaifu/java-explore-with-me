@@ -146,7 +146,7 @@ public class UserInfoServiceImpl implements UserInfoService {
                 }
             }
         }
-        return result.stream().sorted(Comparator.comparing(UserInfoDto::getRating)).collect(Collectors.toList());
+        return result.stream().sorted(Comparator.comparing(UserInfoDto::getRating).reversed()).collect(Collectors.toList());
     }
 
 }
