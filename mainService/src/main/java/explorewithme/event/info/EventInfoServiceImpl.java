@@ -4,7 +4,6 @@ import explorewithme.event.Event;
 import explorewithme.event.dto.EventFullDto;
 import explorewithme.event.dto.EventMapper;
 import explorewithme.event.dto.EventShortDto;
-import explorewithme.utility.interaction.ClientImpl;
 import explorewithme.event.repository.EventRepository;
 import explorewithme.exceptions.InsufficientRightsException;
 import explorewithme.exceptions.notfound.EventNotFoundException;
@@ -18,6 +17,7 @@ import explorewithme.user.User;
 import explorewithme.user.repository.UserRepository;
 import explorewithme.utility.Rating;
 import explorewithme.utility.RatingMapper;
+import explorewithme.utility.interaction.ClientImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -90,7 +90,7 @@ public class EventInfoServiceImpl implements EventInfoService {
         log.info("ratings {}", ratings);
         List<EventFullDto> result = toEventDtoWithRating(ratings);
         log.info("result {}", result);
-        return result;
+        return result.stream().sorted(Comparator.comparing(EventFullDto::getRating)).collect(Collectors.toList());
     }
 
     @Override
